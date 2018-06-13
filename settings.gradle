@@ -1,0 +1,5 @@
+rootProject.name = 'Works - gradle-configurator'
+
+include ":works-android-configure"
+project(":works-android-configure").projectDir = new File("plugin")
+

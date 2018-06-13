@@ -1,3 +1,5 @@
+
+
 rootProject.name = 'Works - gradle-configurator'
 
 include ":works-android-configure"

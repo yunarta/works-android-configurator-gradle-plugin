@@ -26,10 +26,12 @@ interface SubstituteListSpec {
 
 sealed class ReplacementSpec {
 
+    var build: String = ""
+
     abstract fun replace(resolve: DependencyResolveDetails)
 }
 
-class NoReplacementSpec : ReplacementSpec() {
+object NoReplacementSpec : ReplacementSpec() {
 
     override fun replace(resolve: DependencyResolveDetails) {
         throw IllegalArgumentException("incomplete substitution request for ${ModuleSpec.create(resolve.requested)}")
@@ -41,6 +43,7 @@ class WithVersionSpec(private val version: String) : ReplacementSpec() {
 
     override fun replace(resolve: DependencyResolveDetails) {
         resolve.useVersion(version)
+        resolve.because(build)
     }
 
     override fun toString(): String {

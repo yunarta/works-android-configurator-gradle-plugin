@@ -1,3 +1,4 @@
+import com.mobilesolutionworks.gradle.publish.worksPublication
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.utils.sure
 import java.nio.file.*
@@ -12,11 +13,15 @@ plugins {
 }
 
 group = "com.mobilesolutionworks.android"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 apply {
     plugin("kotlin")
     plugin("works-publish")
+}
+
+worksPublication?.apply {
+    module = File("module.properties")
 }
 
 repositories {

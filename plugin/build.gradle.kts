@@ -13,6 +13,7 @@ version = "1.0-SNAPSHOT"
 
 apply {
     plugin("kotlin")
+    plugin("works-publish")
 }
 
 repositories {
@@ -70,7 +71,7 @@ tasks.create("unzipJacoco", Copy::class.java) {
     group = "jacoco"
     description = "Unzip jacocoagent to be used as javaagent in Gradle Runner"
 
-    val outputDir = file("$buildDir/jacocoAgent")
+    val outputDir = File(buildDir, "jacocoAgent")
 
     doFirst {
         outputDir.mkdirs()
@@ -86,18 +87,18 @@ tasks.create("setupJacocoAgent") {
 
     dependsOn("unzipJacoco")
 
-    val outputDir = file("$buildDir/jacocoAgent")
+    val outputDir = File(buildDir, "jacocoAgent")
     doFirst {
         outputDir.mkdirs()
-        file("$outputDir/gradle.properties").writeText("")
+        File(outputDir, "gradle.properties").writeText("")
     }
 
     doLast {
-        val jacocoPath = File(outputDir, "jacocoagent.jar").absolutePath
+        val jacocoPath = File(outputDir, "jacocoagent.jar")
 
-        val gradleProperties = file("$outputDir/gradle.properties")
+        val gradleProperties = File(outputDir, "gradle.properties")
         if (gradle.taskGraph.hasTask(":${project.name}:createJacocoTestReport")) {
-            val jacocoOutputDir = File(buildDir, "jacoco").absolutePath
+            val jacocoOutputDir = File(buildDir, "jacoco")
             gradleProperties.writeText("""org.gradle.jvmargs=-javaagent:${jacocoPath}=destfile=$jacocoOutputDir""".trimMargin())
 
             logger.quiet("""Gradle properties for Tests
@@ -166,7 +167,6 @@ task("cleanTest", Delete::class) {
 
 val ignoreFailures: String? by rootProject.extra
 val shouldIgnoreFailures = ignoreFailures?.toBoolean() ?: false
-
 
 tasks.withType<Test> {
     dependsOn(createClasspathManifest.path)

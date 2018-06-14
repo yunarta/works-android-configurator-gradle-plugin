@@ -26,12 +26,32 @@ repositories {
 val kotlinVersion: String by rootProject.extra
 val sourceSets: SourceSetContainer = java.sourceSets
 
+jacoco {
+    toolVersion = "0.8.1"
+    reportsDir = file("$buildDir/reports")
+}
+
+detekt {
+    version = "1.0.0.RC6-4"
+
+    profile("main", Action {
+        input = "src/main/kotlin"
+        filters = ".*/resources/.*,.*/build/.*"
+        config = file("default-detekt-config.yml")
+        output = "$buildDir/reports/detekt"
+        outputName = "detekt-report"
+        baseline = "reports/baseline.xml"
+    })
+}
+
 val jacocoRuntime by configurations.creating
 
 dependencies {
     jacocoRuntime("org.jacoco:org.jacoco.agent:0.8.1")
 
-    testImplementation("junit:junit:4.12")
+    testImplementation("junit:junit:4.12") {
+        this.reason
+    }
     testImplementation(gradleTestKit())
     testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
         exclude(group = "org.codehaus.groovy")
@@ -64,7 +84,6 @@ val createClasspathManifest = task("createClasspathManifest") {
 
     inputs.files(sourceSets["main"].runtimeClasspath)
     outputs.dir(outputDir)
-
     dependencies {
         testRuntime(outputs.files)
     }
@@ -100,7 +119,7 @@ tasks.create("setupJacocoAgent") {
         val jacocoPath = File(outputDir, "jacocoagent.jar")
 
         val gradleProperties = File(outputDir, "gradle.properties")
-        if (gradle.taskGraph.hasTask(":${project.name}:createJacocoTestReport")) {
+        if (gradle.taskGraph.hasTask(":${project.name}:jacocoCoverageTest")) {
             val jacocoOutputDir = File(buildDir, "jacoco")
             gradleProperties.writeText("""org.gradle.jvmargs=-javaagent:${jacocoPath}=destfile=$jacocoOutputDir""".trimMargin())
 
@@ -111,14 +130,13 @@ tasks.create("setupJacocoAgent") {
     }
 
     outputs.dir(outputDir)
-
     dependencies {
         testRuntime(outputs.files)
     }
 }
 
-tasks.create("createJacocoTestReport", JacocoReport::class.java) {
-    group = "Reporting"
+tasks.create("jacocoCoverageTest", JacocoReport::class.java) {
+    group = "jacoco"
     description = "Generate Jacoco coverage reports for Debug build"
 
     dependsOn("setupJacocoAgent", "test")
@@ -128,19 +146,6 @@ tasks.create("createJacocoTestReport", JacocoReport::class.java) {
         html.isEnabled = true
     }
 
-    // what to exclude from coverage report
-    // UI, "noise", generated classes, platform classes, etc.
-    val excludes = listOf(
-            "**/R.class",
-            "**/R$*.class",
-            "**/*\$ViewInjector*.*",
-            "**/BuildConfig.*",
-            "**/Manifest*.*",
-            "**/*Test*.*",
-            "android/**/*.*",
-            "**/*Fragment.*",
-            "**/*Activity.*"
-    )
     // generated classes
     classDirectories = fileTree(mapOf(
             "dir" to "$buildDir/classes/java/main")
@@ -153,11 +158,18 @@ tasks.create("createJacocoTestReport", JacocoReport::class.java) {
     executionData = fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec"))
 }
 
-tasks.create("testWithCoverage") {
+tasks.create("automationTest") {
     group = "automation"
     description = "Execute test with coverage"
 
-    dependsOn("createJacocoTestReport")
+    dependsOn("cleanTest", "jacocoCoverageTest")
+}
+
+tasks.create("automationCheck") {
+    group = "automation"
+    description = "Execute check"
+
+    dependsOn("detektCheck")
 }
 
 task("cleanTest", Delete::class) {
@@ -174,7 +186,11 @@ val shouldIgnoreFailures = ignoreFailures?.toBoolean() ?: false
 tasks.withType<Test> {
     dependsOn(createClasspathManifest.path)
 
+    maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
     ignoreFailures = shouldIgnoreFailures
+    doFirst {
+        logger.quiet("Test with max $maxParallelForks parallel forks")
+    }
 }
 
 configure<JavaPluginConvention> {

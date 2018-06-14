@@ -1,6 +1,6 @@
 buildscript {
     var kotlinVersion: String by extra
-    kotlinVersion = "1.2.41"
+    kotlinVersion = "1.2.50"
 
     repositories {
         mavenCentral()
@@ -28,7 +28,7 @@ afterEvaluate {
         description = "Execute test with coverage"
 
         dependsOn(*childProjects.values.mapNotNull {
-            it.tasks.findByPath(":${it.name}:createJacocoTestReport")
+            it.tasks.findByPath(":${it.name}:jacocoCoverageTest")
         }.map {
             it.path
         }.toTypedArray())

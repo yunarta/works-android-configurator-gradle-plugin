@@ -21,7 +21,7 @@ test-pattern: # Configure exclusions for test sources
     - 'ForEachOnRange'
 
 build:
-  maxIssues: 10
+  maxIssues: 10000
   weights:
     # complexity: 2
     # LongParameterList: 1
@@ -427,7 +427,7 @@ style:
   NestedClassesVisibility:
     active: false
   NewLineAtEndOfFile:
-    active: true
+    active: false
   NoTabs:
     active: false
   OptionalAbstractKeyword:

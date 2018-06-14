@@ -105,7 +105,7 @@ abstract class PluginTestSpecification extends Specification {
     }
 
     def execute(List<String> arguments) {
-        def execute = new ArrayList(arguments) + "--stacktrace"
+        def execute = new ArrayList(arguments) + "worksPrintDependencies" + "--stacktrace"
         gradleRunner.withArguments(execute).build()
     }
 

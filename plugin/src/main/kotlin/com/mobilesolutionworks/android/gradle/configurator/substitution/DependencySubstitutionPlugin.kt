@@ -28,7 +28,7 @@ class DependencySubstitutionPlugin : Plugin<Project> {
                 }
             }
 
-            var buildSubstitution: String? = project.properties["buildSubstitution"]?.toString()
+            val buildSubstitution: String? = project.properties["buildSubstitution"]?.toString()
             val requestMap = substitutions.evaluate(buildSubstitution)
             requestMap.values.forEach {
                 println("resolved = ${it.request.spec}, replacement = ${it.replacement}")
@@ -40,9 +40,9 @@ class DependencySubstitutionPlugin : Plugin<Project> {
                         val moduleSpec = ModuleSpec(resolve.requested.group, resolve.requested.name, resolve.requested.version)
                         moduleSpec.searchList.mapNotNull {
                             requestMap[it]
-                        }.maxBy {
-                            it.request.spec.toString()
-                        }?.replace(resolve) ?: Unit
+                        }.sortedWith(Comparator { o1, o2 ->
+                            Integer.compare(o2.request.spec.toString().length, o1.request.spec.toString().length)
+                        }).firstOrNull()?.replace(resolve)
                     }
                 }
             }
@@ -54,20 +54,16 @@ class DependencySubstitutionPlugin : Plugin<Project> {
         dependencies.add(ModuleSpec.create(root.module.id).toString())
 
         root.children.forEach {
-            if (project.configurations.findByName(it.configuration)?.isCanBeResolved == true && it in it.parents) {
-                dependencies.addAll(stepIn(project, it))
-            }
+            dependencies.addAll(stepIn(project, it))
         }
 
         return dependencies
     }
 
     private fun createTasks(project: Project) {
-
         with(project) {
             tasks.create("worksPrintDependencies") {
                 it.doLast {
-
                     val dependencies = mutableSetOf<String>()
                     val resolved = project.configurations.flatMapTo(dependencies) { configuration ->
                         if (configuration.isCanBeResolved) {

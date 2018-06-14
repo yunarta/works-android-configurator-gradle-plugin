@@ -26,7 +26,7 @@ class BasePluginTests extends PluginTestSpecification {
         }
         """)
 
-        BuildResult result = execute(":app:worksPrintDependencies", "-PdepOutput=deps.txt")
+        execute(":app:worksPrintDependencies", "-PdepOutput=deps.txt")
 
         then:
         def lines = new File(testDir.root, "deps.txt").readLines()
@@ -45,7 +45,7 @@ class BasePluginTests extends PluginTestSpecification {
         }
         """)
 
-        BuildResult result = execute(":app:worksPrintDependencies", "-PdepOutput=deps.txt")
+        execute(":app:worksPrintDependencies", "-PdepOutput=deps.txt")
 
         then:
         def lines = new File(testDir.root, "deps.txt").readLines()
@@ -69,7 +69,7 @@ class BasePluginTests extends PluginTestSpecification {
         }
         """)
 
-        BuildResult result = execute(":app:worksPrintDependencies",
+        execute(":app:worksPrintDependencies",
                 "-PbuildSubstitution=integration", "-PdepOutput=deps.txt")
 
         then:
@@ -99,7 +99,7 @@ class BasePluginTests extends PluginTestSpecification {
         }
         """)
 
-        BuildResult result = execute(":app:worksPrintDependencies",
+        execute(":app:worksPrintDependencies",
                 "-PbuildSubstitution=integration,unstable", "-PdepOutput=deps.txt")
 
         then:

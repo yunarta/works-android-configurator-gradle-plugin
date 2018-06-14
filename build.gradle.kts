@@ -23,6 +23,18 @@ allprojects {
 }
 
 afterEvaluate {
+    tasks.createLater("jacocoRootReport") {
+        group = "automation"
+        description = "Execute test with coverage"
+
+        dependsOn(*childProjects.values.mapNotNull {
+            it.tasks.findByPath(":${it.name}:createJacocoTestReport")
+        }.map {
+            it.path
+        }.toTypedArray())
+    }
+
+
     tasks.createLater("describe") {
         findProject(":works-android-configure")?.also {
             it.tasks.getByNameLater(Task::class.java, "createClasspathManifest").configure {

@@ -58,9 +58,11 @@ pipeline {
                 seedGrow("test")
 
                 echo "Build for test and analyze"
-//                sh '''./gradlew detektCheck -q'''
+                sh '''./gradlew automationCheck -q'''
                 sh """echo "Execute test"
-                        ./gradlew cleanTest testWithCoverage -PignoreFailures=${seedEval("test", [1: "true", "else": "false"])}"""
+                        ./gradlew cleanTest automationTest -PignoreFailures=${
+                    seedEval("test", [1: "true", "else": "false"])
+                }"""
             }
         }
 
@@ -76,7 +78,7 @@ pipeline {
 
                 jacoco execPattern: 'plugin/build/jacoco/*.exec', classPattern: 'plugin/build/classes/kotlin/main', sourcePattern: ''
                 junit allowEmptyResults: true, testResults: '**/test-results/**/*.xml'
-                // checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/detekt-report.xml', unHealthy: ''
+                checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'plugin/build/reports/detekt/detekt-report.xml', unHealthy: ''
 
                 codeCoverage()
             }

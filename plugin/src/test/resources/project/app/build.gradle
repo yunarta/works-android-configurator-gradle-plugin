@@ -1,0 +1,12 @@
+plugins {
+    id "java-library"
+}
+
+apply plugin: "works-publish"
+
+version "1.0.0"
+
+dependencies {
+    api 'junit:junit:4.4'
+    implementation 'junit:junit-dep:4.4'
+}

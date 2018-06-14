@@ -61,10 +61,15 @@ abstract class PluginTestSpecification extends Specification {
         |    repositories {
         |        google()
         |        jcenter()
+        |        mavenCentral()
+        |        maven {
+        |            url 'https://dl.bintray.com/mobilesolutionworks/release'
+        |        }
         |    }
         |
         |    dependencies {
         |        classpath files($classpathString)
+        |        classpath 'com.mobilesolutionworks:works-publish:1.0.3'
         |    }
         |}
         |
@@ -72,6 +77,7 @@ abstract class PluginTestSpecification extends Specification {
         |   repositories {
         |       google()
         |       jcenter()
+        |       mavenCentral()
         |   }
         |}
         """.stripMargin())
@@ -82,6 +88,8 @@ abstract class PluginTestSpecification extends Specification {
         |        classpath files($classpathString)
         |    }
         |}
+        |
+        |include ':app'
         """.stripMargin())
 
         gradleRunner = GradleRunner.create()
@@ -97,7 +105,7 @@ abstract class PluginTestSpecification extends Specification {
     }
 
     def execute(List<String> arguments) {
-        def execute = new ArrayList(arguments) + "-console" + "verbose" + "--stacktrace"
+        def execute = new ArrayList(arguments) + "--stacktrace"
         gradleRunner.withArguments(execute).build()
     }
 

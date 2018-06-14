@@ -6,6 +6,9 @@ plugins {
     `java-library`
     groovy
     jacoco
+
+    id("io.gitlab.arturbosch.detekt") version "1.0.0.RC6-4"
+    id("org.jetbrains.dokka") version "0.9.17"
 }
 
 group = "com.mobilesolutionworks.android"

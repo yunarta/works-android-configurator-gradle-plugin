@@ -38,34 +38,31 @@ class DependencySubstitutionPlugin : Plugin<Project> {
                 it.resolutionStrategy {
                     it.eachDependency { resolve ->
                         val moduleSpec = ModuleSpec(resolve.requested.group, resolve.requested.name, resolve.requested.version)
-                        moduleSpec.searchList.filter {
-                            requestMap.contains(it)
+                        moduleSpec.searchList.mapNotNull {
+                            requestMap[it]
                         }.maxBy {
-                            it.length
-                        }?.let {
-                            requestMap[it]?.replacement?.let {
-                                it.replace(resolve)
-                            }
-                        }
+                            it.request.spec.toString()
+                        }?.replace(resolve) ?: Unit
                     }
                 }
             }
         }
     }
 
-    private fun createTasks(project: Project) {
-        fun stepIn(root: ResolvedDependency): MutableSet<String> {
-            val dependencies = mutableSetOf<String>()
-            dependencies.add(ModuleSpec.create(root.module.id).toString())
+    private fun stepIn(project: Project, root: ResolvedDependency): MutableSet<String> {
+        val dependencies = mutableSetOf<String>()
+        dependencies.add(ModuleSpec.create(root.module.id).toString())
 
-            root.children.forEach {
-                if (it in it.parents && project.configurations.getByName(it.configuration).isCanBeResolved) {
-                    dependencies.addAll(stepIn(it))
-                }
+        root.children.forEach {
+            if (project.configurations.findByName(it.configuration)?.isCanBeResolved == true && it in it.parents) {
+                dependencies.addAll(stepIn(project, it))
             }
-
-            return dependencies
         }
+
+        return dependencies
+    }
+
+    private fun createTasks(project: Project) {
 
         with(project) {
             tasks.create("worksPrintDependencies") {
@@ -75,15 +72,15 @@ class DependencySubstitutionPlugin : Plugin<Project> {
                     val resolved = project.configurations.flatMapTo(dependencies) { configuration ->
                         if (configuration.isCanBeResolved) {
                             configuration.resolvedConfiguration.firstLevelModuleDependencies.flatMapTo(dependencies) {
-                                stepIn(it)
+                                stepIn(project, it)
                             }
                         } else {
                             emptySet()
                         }
                     }
 
-                    project.properties["depOutput"]?.toString()?.let {
-                        File(project.rootDir, it)
+                    project.properties["depOutput"]?.let {
+                        File(project.rootDir, it.toString())
                                 .writeText(resolved.joinToString(System.lineSeparator()))
                     } ?: resolved.forEach {
                         println(it)

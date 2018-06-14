@@ -15,13 +15,13 @@ class BasePluginTests extends PluginTestSpecification {
         FileUtils.copyDirectory(new File(resource.file), testDir.root)
     }
 
-    def "test substitute by group project"() {
+    def "test substitute by spec project"() {
         when:
         buildGradle.append("""
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
-                substitute group("junit") with version("4.5")
+                substitute spec("junit") with version("4.5")
             }
         }
         """)
@@ -40,7 +40,7 @@ class BasePluginTests extends PluginTestSpecification {
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
-                substitute group("junit:junit") with version("4.5")
+                substitute spec("junit:junit") with version("4.5")
             }
         }
         """)
@@ -58,11 +58,11 @@ class BasePluginTests extends PluginTestSpecification {
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
-                substitute group("junit") with version("4.5")
+                substitute spec("junit") with version("4.5")
                 
                 when {
                     integration {
-                        substitute group("junit") with version("4.11")
+                        substitute spec("junit") with version("4.11")
                     }
                 }
             }
@@ -84,15 +84,15 @@ class BasePluginTests extends PluginTestSpecification {
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
-                substitute group("junit") with version("4.5")
+                substitute spec("junit") with version("4.5")
                 
                 when {
                     integration {
-                        substitute group("junit") with version("4.11")
+                        substitute spec("junit") with version("4.11")
                     }
                     
                     unstable {
-                        substitute group("junit:junit") with version("4.12")
+                        substitute spec("junit:junit") with version("4.12")
                     }
                 }
             }
@@ -114,11 +114,11 @@ class BasePluginTests extends PluginTestSpecification {
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
-                substitute group("junit") with version("4.5")
+                substitute spec("junit") with version("4.5")
                 
                 when {
                     unstable {
-                        substitute group("junit:junit") with version("4.12")
+                        substitute spec("junit:junit") with version("4.12")
                     }
                 }
             }
@@ -133,4 +133,47 @@ class BasePluginTests extends PluginTestSpecification {
         lines.contains("junit:junit:4.12")
     }
 
+    def "trim wrong spec"() {
+        when:
+        buildGradle.append("""
+        subprojects {
+            apply plugin: "works-dependency-substitute"
+            worksSubstitution {
+                substitute spec("junit:") with version("4.5")
+            }
+        }
+        """)
+
+        Exception exception = null
+        try {
+            execute(":app:worksPrintDependencies", "-PdepOutput=deps.txt")
+        } catch (e) {
+            exception = e
+        }
+
+        then:
+        exception != null
+    }
+
+    def "trim incomplete substitution"() {
+        when:
+        buildGradle.append("""
+        subprojects {
+            apply plugin: "works-dependency-substitute"
+            worksSubstitution {
+                substitute spec("junit")
+            }
+        }
+        """)
+
+        Exception exception = null
+        try {
+            execute(":app:worksPrintDependencies", "-PdepOutput=deps.txt")
+        } catch (e) {
+            exception = e
+        }
+
+        then:
+        exception != null
+    }
 }

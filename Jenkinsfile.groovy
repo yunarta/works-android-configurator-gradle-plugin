@@ -112,7 +112,7 @@ pipeline {
                     }
 
                     steps {
-                        sh """./gradlew cleanTest testWithCoverage worksGeneratePublication -PignoreFailures=false"""
+                        sh """./gradlew cleanTest test worksGeneratePublication -PignoreFailures=false"""
                     }
                 }
             }

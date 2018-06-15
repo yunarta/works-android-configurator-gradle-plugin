@@ -6,6 +6,21 @@
 This plugin would help you develop a better CI flow by configuring aspect of Gradle build from command line or 
 gradle.properties that relates to CI flow.
 
+## Installation
+
+```groovy
+buildscript {
+    repositories {
+        maven {
+            url = "https://dl.bintray.com/mobilesolutionworks/release"
+        }
+    }
+    
+    dependencies {
+        classpath("com.mobilesolutionworks:works-gradle-configurator:1.0.1")
+    }    
+}
+```
 ## Dependency Substitution
 
 Applying plugin

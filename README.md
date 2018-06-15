@@ -17,7 +17,7 @@ buildscript {
     }
     
     dependencies {
-        classpath("com.mobilesolutionworks:works-gradle-configurator:1.0.1")
+        classpath("com.mobilesolutionworks:works-gradle-configurator:1.0.2")
     }    
 }
 ```

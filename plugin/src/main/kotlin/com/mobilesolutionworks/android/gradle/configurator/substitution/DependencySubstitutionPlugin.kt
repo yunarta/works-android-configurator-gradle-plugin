@@ -3,6 +3,11 @@ package com.mobilesolutionworks.android.gradle.configurator.substitution
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+val Project.worksSubstitution: RootSubstituteListContainer?
+    get() {
+        return extensions.findByName("worksSubstitution") as? RootSubstituteListContainer
+    }
+
 class DependencySubstitutionPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {

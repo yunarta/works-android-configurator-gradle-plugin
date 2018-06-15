@@ -17,7 +17,7 @@ buildscript {
     }
     
     dependencies {
-        classpath("com.mobilesolutionworks:works-gradle-configurator:1.0.1")
+        classpath("com.mobilesolutionworks:works-gradle-configurator:1.0.2")
     }    
 }
 ```
@@ -53,6 +53,24 @@ subprojects {
 }
 ```
 
+root **build.gradle.kts**
+```kotlin 
+import com.mobilesolutionworks.android.gradle.configurator.substitution.worksSubstitution
+
+subprojects {
+    apply {
+        plugin("works-dependency-substitute")
+    }
+    
+    worksSubstitution?.apply {
+        // replace all dependency with same group with specified version   
+        substitute(spec("com.android.support")) with version("27.1.1")
+        
+        // replace specified dependency with specified version
+        substitute(spec("io.reactivex.rxjava2:rxjava")) with version("2.1.12")
+    }
+}
+```
 The same pattern can be used to substitute dependency within module **build.gradle**
 
 ### Conditional substitution

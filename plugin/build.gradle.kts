@@ -57,7 +57,10 @@ dependencies {
     testImplementation("junit:junit:4.12") {
         this.reason
     }
+
     testImplementation(gradleTestKit())
+    testImplementation("org.mockito:mockito-core:2.8.9")
+    testImplementation("com.nhaarman:mockito-kotlin:1.5.0")
     testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
         exclude(group = "org.codehaus.groovy")
     }

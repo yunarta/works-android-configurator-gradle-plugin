@@ -1,0 +1,60 @@
+plugins {
+    id "java-library"
+}
+
+repositories {
+    google()
+    jcenter()
+    mavenCentral()
+}
+
+apply plugin: "works-publish"
+
+version "1.0.0"
+
+
+HashSet<String> stepIn(Project project, ResolvedDependency root) {
+    def dependencies = new HashSet<String>()
+
+    def id = root.module.id
+    def key = "${id.group}:${id.module.name}:${id.version}"
+
+    dependencies.add(key)
+    root.children.forEach {
+        dependencies.addAll(stepIn(project, it))
+    }
+
+    return dependencies
+}
+
+task worksPrintDependencies() {
+    doLast {
+        def dependencies = new HashSet<String>()
+        def resolved = project.configurations.collectMany(dependencies) { configuration ->
+            if (configuration.canBeResolved) {
+                ResolvedConfiguration resolvedConfiguration = configuration.resolvedConfiguration
+                resolvedConfiguration.firstLevelModuleDependencies.collectMany {
+                    stepIn(project, it)
+                }
+            } else {
+                return new HashSet<String>()
+            }
+        }
+
+        def get = project.properties.get("depOutput")
+        if (get != null) {
+            new File(project.rootDir, get.toString())
+                    .write(resolved.join(System.lineSeparator()))
+        } else {
+            resolved.each {
+                println(it)
+            }
+        }
+    }
+}
+
+dependencies {
+    api 'io.reactivex.rxjava2:rxjava:2.1.14'
+    api 'junit:junit:4.4'
+    implementation 'junit:junit-dep:4.4'
+}

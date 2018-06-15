@@ -2,24 +2,33 @@ package com.mobilesolutionworks.android.gradle.configurator.base
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import java.nio.file.Paths
+
 abstract class PluginTestSpecification extends Specification {
 
-    public static TemporaryFolder testDir = new TemporaryFolder(new File("build/tmp"))
+    private static tempDir = Paths.get("build", "tmp", "runTest").toFile()
+
+    public static TemporaryFolder testDir = new TemporaryFolder(tempDir)
 
     private static File gradleProperties
-    private static File buildGradle
+
+    static File buildGradle
+    static File settingsGradle
 
     @BeforeClass
     static def setupFolder() {
+        tempDir.mkdirs()
         testDir.create()
 
         gradleProperties = testDir.newFile("gradle.properties")
         buildGradle = testDir.newFile("build.gradle")
+        settingsGradle = testDir.newFile("settings.gradle")
     }
 
     GradleRunner gradleRunner
@@ -38,31 +47,50 @@ abstract class PluginTestSpecification extends Specification {
                 .collect { "'$it'" }
                 .join(", ")
 
-        def agent = loader.getResource("gradle.properties").text + File.separatorChar + "${getClass().name}.exec"
-        agent = agent.replace('\\', '\\\\')
+        def resource = loader.getResource("gradle.properties")
+        if (resource != null) {
+            def agent = resource.text + File.separatorChar + "${getClass().name}.exec"
+            agent = agent.replace('\\', '\\\\')
 
-        gradleProperties.write("""${agent}
-                                 |org.gradle.daemon=true""".stripMargin("|"))
+            gradleProperties.write("""${agent}
+            |org.gradle.daemon=true""".stripMargin("|"))
+        }
 
         buildGradle.write("""
-            |buildscript {
-            |    repositories {
-            |        google()
-            |        jcenter()
-            |    }
-            |
-            |    dependencies {
-            |        classpath files($classpathString)
-            |    }
-            |}
-            |
-            |allprojects {
-            |   repositories {
-            |       google()
-            |       jcenter()
-            |   }
-            |}
-        """.stripMargin('|'))
+        |buildscript {
+        |    repositories {
+        |        google()
+        |        jcenter()
+        |        mavenCentral()
+        |        maven {
+        |            url 'https://dl.bintray.com/mobilesolutionworks/release'
+        |        }
+        |    }
+        |
+        |    dependencies {
+        |        classpath files($classpathString)
+        |        classpath 'com.mobilesolutionworks:works-publish:1.0.3'
+        |    }
+        |}
+        |
+        |allprojects {
+        |   repositories {
+        |       google()
+        |       jcenter()
+        |       mavenCentral()
+        |   }
+        |}
+        """.stripMargin())
+
+        settingsGradle.write("""
+        |buildscript {
+        |    dependencies {
+        |        classpath files($classpathString)
+        |    }
+        |}
+        |
+        |include ':app'
+        """.stripMargin())
 
         gradleRunner = GradleRunner.create()
                 .withProjectDir(testDir.root)
@@ -77,13 +105,13 @@ abstract class PluginTestSpecification extends Specification {
     }
 
     def execute(List<String> arguments) {
-        def execute = new ArrayList(arguments) + "--stacktrace"
+        def execute = new ArrayList(arguments) + "worksPrintDependencies" + "--stacktrace"
         gradleRunner.withArguments(execute).build()
     }
 
     def verifySuccess(BuildResult result, List<String> arguments) {
         return arguments.collect {
-            result.task(it).outcome == SUCCESS
+            result.task(it).outcome == TaskOutcome.SUCCESS
         }.inject(true) {
             initial, next -> initial && next
         }

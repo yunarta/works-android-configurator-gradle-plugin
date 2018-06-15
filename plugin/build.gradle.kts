@@ -21,7 +21,7 @@ apply {
 }
 
 worksPublication?.apply {
-    module = File("module.properties")
+    module = File(projectDir,"module.properties")
 }
 
 repositories {

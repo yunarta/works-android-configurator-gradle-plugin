@@ -255,6 +255,6 @@ def publish(String repo) {
 
 def codeCoverage() {
     withCredentials([[$class: 'StringBinding', credentialsId: "codecov-token", variable: "CODECOV_TOKEN"]]) {
-        sh "curl -s https://codecov.io/bash | bash -s - -f plugin/build/reports/jacoco/createJacocoTestReport/createJacocoTestReport.xml"
+        sh "curl -s https://codecov.io/bash | bash -s - -f plugin/build/reports/jacocoCoverageTest/jacocoCoverageTest.xml"
     }
 }

@@ -16,7 +16,7 @@ interface SubstituteListSpec {
 
         var replacement: ReplacementSpec
 
-        fun with(spec: ReplacementSpec)
+        infix fun with(spec: ReplacementSpec)
 
         fun replace(resolve: DependencyResolveDetails) {
             replacement.replace(resolve)

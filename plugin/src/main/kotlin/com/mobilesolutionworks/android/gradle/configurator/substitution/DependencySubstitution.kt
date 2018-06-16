@@ -34,6 +34,7 @@ class ModuleSpec constructor(val group: String, val module: String, val version:
             return ModuleSpec(id.group, id.name, id.version)
         }
 
+        @Suppress("MagicNumber")
         fun create(spec: String): ModuleSpec? {
             val pattern = "([\\w\\.-]+)(?>\$|:([\\w-]+))(?>\$|:{1}(.+))"
             return pattern.toRegex().find(spec)?.let {

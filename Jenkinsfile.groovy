@@ -100,6 +100,7 @@ pipeline {
                     }
 
                     steps {
+                        updateVersion()
                         sh './gradlew clean worksGeneratePublication'
                     }
                 }
@@ -225,6 +226,13 @@ def compareArtifact(String repo, String job) {
     } else {
         writeFile file: ".notify", text: job
     }
+}
+
+def updateVersion() {
+    def properties = readProperties(file: 'plugin/module.properties')
+    properties.version = properties.version + "-BUILD-${BUILD_NUMBER}"
+    sh "rm plugin/module.properties"
+    writeYaml file: 'plugin/module.properties', data: properties
 }
 
 def doPublish() {

@@ -12,7 +12,7 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", kotlinVersion))
-        classpath("com.mobilesolutionworks:works-publish:1.5.1")
+        classpath("com.mobilesolutionworks:works-publish:1.5.2")
     }
 }
 

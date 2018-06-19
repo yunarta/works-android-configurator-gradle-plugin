@@ -3,11 +3,12 @@ buildscript {
     kotlinVersion = "1.2.50"
 
     repositories {
+        jcenter()
+        google()
         mavenCentral()
         maven {
             url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/release")
         }
-
     }
 
     dependencies {
@@ -18,6 +19,8 @@ buildscript {
 
 allprojects {
     repositories {
+        jcenter()
+        google()
         mavenCentral()
     }
 }

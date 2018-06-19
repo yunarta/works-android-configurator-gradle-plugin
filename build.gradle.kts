@@ -12,34 +12,12 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", kotlinVersion))
-        classpath("com.mobilesolutionworks:works-publish:1.0.5")
+        classpath("com.mobilesolutionworks:works-publish:1.5.1")
     }
 }
 
 allprojects {
     repositories {
         mavenCentral()
-    }
-}
-
-afterEvaluate {
-    tasks.createLater("jacocoRootReport") {
-        group = "automation"
-        description = "Execute test with coverage"
-
-        dependsOn(*childProjects.values.mapNotNull {
-            it.tasks.findByPath(":${it.name}:jacocoCoverageTest")
-        }.map {
-            it.path
-        }.toTypedArray())
-    }
-
-
-    tasks.createLater("describe") {
-        findProject(":works-android-configure")?.also {
-            it.tasks.getByNameLater(Task::class.java, "createClasspathManifest").configure {
-                this@createLater.dependsOn(path)
-            }
-        }
     }
 }

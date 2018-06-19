@@ -1,3 +1,4 @@
+import com.mobilesolutionworks.gradle.publish.PublishedDoc
 import com.mobilesolutionworks.gradle.publish.worksPublication
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.utils.sure
@@ -8,7 +9,7 @@ plugins {
     groovy
     jacoco
 
-    id("io.gitlab.arturbosch.detekt") version "1.0.0.RC6-4"
+    id("io.gitlab.arturbosch.detekt") version "1.0.0.RC7-2"
     id("org.jetbrains.dokka") version "0.9.17"
 }
 
@@ -21,7 +22,8 @@ apply {
 }
 
 worksPublication?.apply {
-    module = file("module.properties")
+    javadoc = PublishedDoc.Kotlin
+    module = file("module.yaml")
 }
 
 repositories {
@@ -30,6 +32,10 @@ repositories {
 
 val kotlinVersion: String by rootProject.extra
 val sourceSets: SourceSetContainer = java.sourceSets
+
+configure<JavaPluginConvention> {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
 
 jacoco {
     toolVersion = "0.8.1"
@@ -59,7 +65,7 @@ dependencies {
     }
 
     testImplementation(gradleTestKit())
-    testImplementation("org.mockito:mockito-core:2.8.9")
+    testImplementation("org.mockito:mockito-core:2.19.0")
     testImplementation("com.nhaarman:mockito-kotlin:1.5.0")
     testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
         exclude(group = "org.codehaus.groovy")
@@ -71,13 +77,20 @@ dependencies {
     implementation(kotlin("reflect", kotlinVersion))
 }
 
-val createClasspathManifest = task("createClasspathManifest") {
+task("cleanTest", Delete::class) {
+    delete(
+            tasks.getByName("test").outputs.files,
+            Paths.get("build", "tmp", "runTest").toFile()
+    )
+}
+
+val createClasspathManifest = tasks.create("createClasspathManifest") {
     group = "plugin development"
     description = "Create classpath manifest required to be used in GradleRunner"
 
     val outputDir = Paths.get(buildDir.toString(), "testKit", "classpath").toFile()
     doFirst {
-        buildDir.mkdirs()
+        outputDir.mkdirs()
     }
 
     doLast {
@@ -95,6 +108,48 @@ val createClasspathManifest = task("createClasspathManifest") {
     dependencies {
         testRuntime(outputs.files)
     }
+}
+
+tasks.create("jacocoCoverageTest", JacocoReport::class.java) {
+    group = "jacoco"
+    description = "Generate Jacoco coverage reports for Debug build"
+
+    dependsOn("setupJacocoAgent", "test")
+    inputs.file(fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec")))
+    reports {
+        xml.isEnabled = true
+        html.isEnabled = true
+    }
+
+    // generated classes
+    classDirectories = fileTree(mapOf(
+            "dir" to "$buildDir/classes/java/main")
+    ) + fileTree(mapOf(
+            "dir" to "$buildDir/classes/kotlin/main")
+    )
+
+    // sources
+    sourceDirectories = files(listOf("src/main/kotlin", "src/main/java", "/src/test/groovy"))
+    executionData = fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec"))
+}
+
+tasks.create("automationTest") {
+    group = "automation"
+    description = "Execute test with coverage"
+
+    dependsOn("cleanTest", "jacocoCoverageTest")
+}
+
+tasks.create("automationCheck") {
+    group = "automation"
+    description = "Execute check"
+
+    dependsOn("detektCheck")
+}
+
+tasks.withType<KotlinCompile> {
+    group = "compilation"
+    kotlinOptions.jvmTarget = "1.8"
 }
 
 tasks.create("unzipJacoco", Copy::class.java) {
@@ -143,51 +198,6 @@ tasks.create("setupJacocoAgent") {
     }
 }
 
-tasks.create("jacocoCoverageTest", JacocoReport::class.java) {
-    group = "jacoco"
-    description = "Generate Jacoco coverage reports for Debug build"
-
-    dependsOn("setupJacocoAgent", "test")
-    inputs.file(fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec")))
-    reports {
-        xml.isEnabled = true
-        html.isEnabled = true
-    }
-
-    // generated classes
-    classDirectories = fileTree(mapOf(
-            "dir" to "$buildDir/classes/java/main")
-    ) + fileTree(mapOf(
-            "dir" to "$buildDir/classes/kotlin/main")
-    )
-
-    // sources
-    sourceDirectories = files(listOf("src/main/kotlin", "src/main/java", "/src/test/groovy"))
-    executionData = fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec"))
-}
-
-tasks.create("automationTest") {
-    group = "automation"
-    description = "Execute test with coverage"
-
-    dependsOn("cleanTest", "jacocoCoverageTest")
-}
-
-tasks.create("automationCheck") {
-    group = "automation"
-    description = "Execute check"
-
-    dependsOn("detektCheck")
-}
-
-task("cleanTest", Delete::class) {
-    delete(
-            tasks.getByName("test").outputs.files,
-            tasks.getByName("setupJacocoAgent").outputs.files,
-            Paths.get("build", "tmp", "runTest").toFile()
-    )
-}
-
 val ignoreFailures: String? by rootProject.extra
 val shouldIgnoreFailures = ignoreFailures?.toBoolean() ?: false
 
@@ -196,15 +206,8 @@ tasks.withType<Test> {
 
     maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
     ignoreFailures = shouldIgnoreFailures
+
     doFirst {
         logger.quiet("Test with max $maxParallelForks parallel forks")
     }
-}
-
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
 }

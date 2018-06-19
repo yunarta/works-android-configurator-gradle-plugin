@@ -113,7 +113,7 @@ pipeline {
                     }
 
                     steps {
-                        sh """./gradlew cleanTest test worksGeneratePublication -PignoreFailures=false"""
+                        sh """./gradlew clean test worksGeneratePublication"""
                     }
                 }
             }
@@ -137,7 +137,7 @@ pipeline {
 
                     steps {
                         echo "Compare snapshot"
-                        compareArtifact("snapshot", "integrate/snapshot")
+                        compareArtifact("snapshot", "integrate/snapshot", false)
                     }
                 }
 
@@ -150,7 +150,7 @@ pipeline {
 
                     steps {
                         echo "Compare release"
-                        compareArtifact("release", "integrate/release")
+                        compareArtifact("release", "integrate/release", true)
                     }
                 }
             }
@@ -200,43 +200,49 @@ pipeline {
     }
 }
 
-def compareArtifact(String repo, String job) {
-    bintrayDownload([
-            dir       : ".compare",
-            credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readProperties(file: 'plugin/module.properties'),
-            repo      : "mobilesolutionworks/${repo}",
-            src       : "plugin/build/libs"
-    ])
+def updateVersion() {
+    bintrayDownloadMatches repository: "mobilesolutionworks/snapshot",
+            packageInfo: readYaml(file: 'plugin/module.yaml'),
+            credential: "mobilesolutionworks.jfrog.org"
 
-    def same = bintrayCompare([
-            dir       : ".compare",
-            credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readProperties(file: 'plugin/module.properties'),
-            repo      : "mobilesolutionworks/${repo}",
-            src       : "plugin/build/libs"
-    ])
+    def properties = readYaml(file: 'plugin/module.yaml')
+    def incremented = versionIncrementQualifier()
+    if (incremented != null) {
+        properties.version = incremented
+    } else {
+        properties.version = properties.version + "-BUILD-1"
+    }
 
-    if (fileExists(".notify")) {
-        sh "rm .notify"
+    sh "rm plugin/module.yaml"
+    writeYaml file: 'plugin/module.yaml', data: properties
+}
+
+
+def compareArtifact(String repo, String job, boolean download) {
+    if (download) {
+        bintrayDownloadMatches repository: "mobilesolutionworks/${repo}",
+                packageInfo: readYaml(file: 'plugin/module.yaml'),
+                credential: "mobilesolutionworks.jfrog.org"
+    }
+
+    def same = bintrayCompare repository: "mobilesolutionworks/${repo}",
+            packageInfo: readYaml(file: 'plugin/module.yaml'),
+            credential: "mobilesolutionworks.jfrog.org",
+            path: "plugin/build/libs"
+
+    if (fileExists(".jenkins/notify")) {
+        sh "rm .jenkins/notify"
     }
 
     if (same) {
         echo "Artifact output is identical, no integration needed"
     } else {
-        writeFile file: ".notify", text: job
+        writeFile file: ".jenkins/notify", text: job
     }
 }
 
-def updateVersion() {
-    def properties = readProperties(file: 'plugin/module.properties')
-    properties.version = properties.version + "-BUILD-${BUILD_NUMBER}"
-    sh "rm plugin/module.properties"
-    writeYaml file: 'plugin/module.properties', data: properties
-}
-
 def doPublish() {
-    return fileExists(".notify")
+    return fileExists(".jenkins/notify")
 }
 
 def notifyDownstream() {
@@ -254,7 +260,7 @@ def publish(String repo) {
     if (who == "works") {
         bintrayPublish([
                 credential: "mobilesolutionworks.jfrog.org",
-                pkg       : readProperties(file: 'plugin/module.properties'),
+                pkg       : readProperties(file: 'plugin/module.yaml'),
                 repo      : "mobilesolutionworks/${repo}",
                 src       : "plugin/build/libs"
         ])

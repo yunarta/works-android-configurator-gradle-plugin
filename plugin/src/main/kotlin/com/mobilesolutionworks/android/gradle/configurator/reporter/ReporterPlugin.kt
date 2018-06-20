@@ -39,135 +39,146 @@ class ReporterPlugin : Plugin<Project> {
 
     private fun startConfiguration(project: Project) {
         with(project) {
-            tasks.create("worksGatherTestReport", Copy::class.java) { copy: Copy ->
-                copy.group = "works reporter"
-                copy.into(project.buildDir.paths("reports", "junit"))
-
-                subprojects { subProject ->
-                    subProject.tasks.withType(Test::class.java).map {
-                        val name = when (it.name) {
-                            subProject.reporter.defaultTest -> "default"
-                            else -> it.name
-                        }
-
-                        copy.from(it) { spec ->
-                            spec.include("*.xml")
-                            spec.into(Paths.get("xml", it.project.name, name).toFile())
-                        }
-
-                        copy.from(it) { spec ->
-                            spec.exclude("*.xml")
-                            spec.into(Paths.get("html", it.project.name, name).toFile())
-                        }
-                    }
-                }
-            }
-
-            tasks.create("worksGatherCoverageReport", Copy::class.java) { copy ->
-                copy.group = "works reporter"
-                copy.into(project.buildDir.paths("reports", "jacoco"))
-                copy.shouldRunAfter("worksRootJacocoReport")
-
-                subprojects { subProject ->
-                    subProject.tasks.withType(JacocoReport::class.java).forEach {
-                        val xmlReport = it.reports.xml
-                        val htmlReport = it.reports.html
-
-                        val name = when (it.name) {
-                            subProject.reporter.defaultCoverage -> {
-                                xmlReport.isEnabled = true
-                                htmlReport.isEnabled = true
-                                "default"
-                            }
-                            else -> it.name
-                        }
-
-                        if (xmlReport.isEnabled) {
-                            copy.from(xmlReport.destination) { spec ->
-                                spec.rename(".*\\.xml\$", "coverage.xml")
-                                spec.into(Paths.get("xml", it.project.name, name).toFile())
-                            }
-                        }
-
-                        if (htmlReport.isEnabled) {
-                            copy.from(htmlReport.destination) { spec ->
-                                spec.into(Paths.get("html", it.project.name, name).toFile())
-                            }
-                        }
-                    }
-                }
-            }
-
-            val mergeCoverage = tasks.create("worksMergeJacocoExec", JacocoMerge::class.java) { jacoco ->
-                jacoco.group = "works reporter"
-                jacoco.destinationFile = project.buildDir.paths("reports", "jacoco", "exec", "root", "jacoco.exec")
-
-                jacoco.onlyIf {
-                    var execute = false
-                    subprojects {
-                        it.tasks.withType(JacocoReport::class.java).forEach {
-                            it.executionData.files.filter {
-                                it.exists()
-                            }.forEach {
-                                execute = true
-                                jacoco.executionData(it)
-                            }
-                        }
-                    }
-                    execute
-                }
-            }
-
-            tasks.create("worksRootJacocoReport", JacocoReport::class.java) { jacoco ->
-                jacoco.group = "works reporter"
-                jacoco.dependsOn(mergeCoverage.path)
-
-                subprojects {
-                    val jacocoCoverageTests = it.tasks.withType(JacocoReport::class.java)
-                    jacoco.classDirectories = files(jacocoCoverageTests.flatMap {
-                        it.classDirectories ?: files()
-                    })
-
-                    jacoco.sourceDirectories = files(jacocoCoverageTests.flatMap {
-                        it.sourceDirectories ?: files()
-                    })
-
-
-                    jacoco.executionData(mergeCoverage.destinationFile)
-                    jacoco.reports {
-                        it.xml.isEnabled = true
-                        it.xml.destination = project.buildDir.paths("reports", "jacoco", "xml", "root", "coverage.xml")
-                        it.html.isEnabled = true
-                        it.html.destination = project.buildDir.paths("reports", "jacoco", "html", "root")
-                    }
-                }
-            }
-
-            tasks.create("worksGatherCheckstyle", Copy::class.java) { copy ->
-                copy.group = "works reporter"
-                copy.into(project.buildDir.paths("reports", "checkstyle"))
-
-                subprojects {
-                    val extension = it.reporter
-                    createCopySpec(copy, it, extension.checkstyleTasks, extension.checkstyleFiles)
-                }
-            }
-
-            tasks.create("worksGatherPMD", Copy::class.java) { copy ->
-                copy.group = "works reporter"
-                copy.into(project.buildDir.paths("reports", "pmd"))
-
-                subprojects {
-                    val extension = it.reporter
-                    createCopySpec(copy, it, extension.pmdTasks, extension.pmdFiles)
-                }
-            }
+            createGatherTestTasks(project)
+            createGatherJacocoTasks(project)
+            createGatherStaticAnalysisTasks(project)
 
             tasks.create("worksGatherReport") {
                 it.group = "works reporter"
 
                 it.shouldRunAfter("worksRootJacocoReport")
-                it.dependsOn("worksGatherCheckstyle", "worksGatherPMD", "worksRootJacocoReport", "worksGatherTestReport", "worksGatherCoverageReport")
+                it.dependsOn("worksGatherCheckstyle", "worksGatherPMD", "worksRootJacocoReport",
+                        "worksGatherTestReport", "worksGatherCoverageReport")
+            }
+        }
+    }
+
+    private fun Project.createGatherTestTasks(subProject: Project) {
+        tasks.create("worksGatherTestReport", Copy::class.java) { copy: Copy ->
+            copy.group = "works reporter"
+            copy.into(subProject.buildDir.paths("reports", "junit"))
+
+            subprojects { subProject ->
+                subProject.tasks.withType(Test::class.java).map {
+                    val name = when (it.name) {
+                        subProject.reporter.defaultTest -> "default"
+                        else -> it.name
+                    }
+
+                    copy.from(it) { spec ->
+                        spec.include("*.xml")
+                        spec.into(Paths.get("xml", it.project.name, name).toFile())
+                    }
+
+                    copy.from(it) { spec ->
+                        spec.exclude("*.xml")
+                        spec.into(Paths.get("html", it.project.name, name).toFile())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun Project.createGatherJacocoTasks(subProject: Project) {
+        tasks.create("worksGatherCoverageReport", Copy::class.java) { copy ->
+            copy.group = "works reporter"
+            copy.into(subProject.buildDir.paths("reports", "jacoco"))
+            copy.shouldRunAfter("worksRootJacocoReport")
+
+            subprojects { subProject ->
+                subProject.tasks.withType(JacocoReport::class.java).forEach {
+                    val xmlReport = it.reports.xml
+                    val htmlReport = it.reports.html
+
+                    val name = when (it.name) {
+                        subProject.reporter.defaultCoverage -> {
+                            xmlReport.isEnabled = true
+                            htmlReport.isEnabled = true
+                            "default"
+                        }
+                        else -> it.name
+                    }
+
+                    if (xmlReport.isEnabled) {
+                        copy.from(xmlReport.destination) { spec ->
+                            spec.rename(".*\\.xml\$", "coverage.xml")
+                            spec.into(Paths.get("xml", it.project.name, name).toFile())
+                        }
+                    }
+
+                    if (htmlReport.isEnabled) {
+                        copy.from(htmlReport.destination) { spec ->
+                            spec.into(Paths.get("html", it.project.name, name).toFile())
+                        }
+                    }
+                }
+            }
+        }
+
+        val mergeCoverage = tasks.create("worksMergeJacocoExec", JacocoMerge::class.java) { jacoco ->
+            jacoco.group = "works reporter"
+            jacoco.destinationFile = subProject.buildDir.paths("reports", "jacoco", "exec", "root", "jacoco.exec")
+
+            jacoco.onlyIf {
+                var execute = false
+                subprojects {
+                    it.tasks.withType(JacocoReport::class.java).forEach {
+                        it.executionData.files.filter {
+                            it.exists()
+                        }.forEach {
+                            execute = true
+                            jacoco.executionData(it)
+                        }
+                    }
+                }
+                execute
+            }
+        }
+
+        tasks.create("worksRootJacocoReport", JacocoReport::class.java) { jacoco ->
+            jacoco.group = "works reporter"
+            jacoco.dependsOn(mergeCoverage.path)
+
+            subprojects {
+                val jacocoCoverageTests = it.tasks.withType(JacocoReport::class.java)
+                jacoco.classDirectories = files(jacocoCoverageTests.flatMap {
+                    it.classDirectories ?: files()
+                })
+
+                jacoco.sourceDirectories = files(jacocoCoverageTests.flatMap {
+                    it.sourceDirectories ?: files()
+                })
+
+
+                jacoco.executionData(mergeCoverage.destinationFile)
+                jacoco.reports {
+                    it.xml.isEnabled = true
+                    it.xml.destination = subProject.buildDir.paths("reports", "jacoco", "xml", "root", "coverage.xml")
+                    it.html.isEnabled = true
+                    it.html.destination = subProject.buildDir.paths("reports", "jacoco", "html", "root")
+                }
+            }
+        }
+    }
+
+    private fun Project.createGatherStaticAnalysisTasks(subProject: Project) {
+        tasks.create("worksGatherCheckstyle", Copy::class.java) { copy ->
+            copy.group = "works reporter"
+            copy.into(subProject.buildDir.paths("reports", "checkstyle"))
+
+            subprojects {
+                val extension = it.reporter
+                createCopySpec(copy, it, extension.checkstyleTasks, extension.checkstyleFiles)
+            }
+        }
+
+        tasks.create("worksGatherPMD", Copy::class.java) { copy ->
+            copy.group = "works reporter"
+            copy.into(subProject.buildDir.paths("reports", "pmd"))
+
+            subprojects {
+                val extension = it.reporter
+                createCopySpec(copy, it, extension.pmdTasks, extension.pmdFiles)
             }
         }
     }

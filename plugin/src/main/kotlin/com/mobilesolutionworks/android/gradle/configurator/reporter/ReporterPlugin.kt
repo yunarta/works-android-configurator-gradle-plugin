@@ -99,16 +99,22 @@ class ReporterPlugin : Plugin<Project> {
             }
 
             val mergeCoverage = tasks.create("worksMergeJacocoExec", JacocoMerge::class.java) { jacoco ->
-                subprojects {
-                    it.tasks.withType(JacocoReport::class.java).forEach {
-                        jacoco.executionData(it.executionData)
-                    }
-                }
+                jacoco.group = "works reporter"
                 jacoco.destinationFile = project.buildDir.paths("reports", "jacoco", "exec", "root", "jacoco.exec")
-               jacoco.onlyIf {
-                    jacoco.executionData?.map {
-                        it.exists()
-                    }?.reduce { a, b -> a && b } ?: false
+
+                jacoco.onlyIf {
+                    var execute = false
+                    subprojects {
+                        it.tasks.withType(JacocoReport::class.java).forEach {
+                            it.executionData.files.filter {
+                                it.exists()
+                            }.forEach {
+                                execute = true
+                                jacoco.executionData(it)
+                            }
+                        }
+                    }
+                    execute
                 }
             }
 
@@ -138,6 +144,7 @@ class ReporterPlugin : Plugin<Project> {
             }
 
             tasks.create("worksGatherCheckstyle", Copy::class.java) { copy ->
+                copy.group = "works reporter"
                 copy.into(project.buildDir.paths("reports", "checkstyle"))
 
                 subprojects {
@@ -147,6 +154,7 @@ class ReporterPlugin : Plugin<Project> {
             }
 
             tasks.create("worksGatherPMD", Copy::class.java) { copy ->
+                copy.group = "works reporter"
                 copy.into(project.buildDir.paths("reports", "pmd"))
 
                 subprojects {
@@ -156,6 +164,8 @@ class ReporterPlugin : Plugin<Project> {
             }
 
             tasks.create("worksGatherReport") {
+                it.group = "works reporter"
+
                 it.shouldRunAfter("worksRootJacocoReport")
                 it.dependsOn("worksRootJacocoReport", "worksGatherTestReport", "worksGatherCoverageReport")
             }

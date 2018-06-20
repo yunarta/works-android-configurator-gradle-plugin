@@ -45,7 +45,7 @@ task silentJacocoTestReport(type: JacocoReport, dependsOn: "test") {
 
     // sources
     sourceDirectories = files("src/main/java")
-    executionData = files("$buildDir/jacoco/test.exec")
+    executionData = files("$buildDir/jacoco/silent.exec")
 }
 
 task developerJacocoTestReport(type: JacocoReport, dependsOn: "test") {
@@ -62,6 +62,22 @@ task developerJacocoTestReport(type: JacocoReport, dependsOn: "test") {
     // sources
     sourceDirectories = files("src/main/java")
     executionData = files("$buildDir/jacoco/test.exec")
+}
+
+task anotherSilentJacocoTestReport(type: JacocoReport, dependsOn: "test") {
+    reports {
+        xml.enabled = false
+        html.enabled = false
+    }
+
+    // generated classes
+    classDirectories = fileTree(
+            dir: "$buildDir/classes/java/main",
+    )
+
+    // sources
+    sourceDirectories = files("src/main/java")
+    executionData = files("$buildDir/jacoco/anotherSilent.exec")
 }
 
 task worksPrintDependencies() {

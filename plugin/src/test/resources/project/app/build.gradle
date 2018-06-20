@@ -9,6 +9,7 @@ repositories {
 }
 
 apply plugin: "works-publish"
+apply plugin: "jacoco"
 
 version "1.0.0"
 
@@ -25,6 +26,22 @@ HashSet<String> stepIn(Project project, ResolvedDependency root) {
     }
 
     return dependencies
+}
+
+task developerJacocoTestReport(type: JacocoReport, dependsOn: "test") {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    // generated classes
+    classDirectories = fileTree(
+            dir: "$buildDir/classes/java/main",
+    )
+
+    // sources
+    sourceDirectories = files("src/main/java")
+    executionData = files("$buildDir/jacoco/test.exec")
 }
 
 task worksPrintDependencies() {
@@ -54,6 +71,8 @@ task worksPrintDependencies() {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.4'
+
     api 'io.reactivex.rxjava2:rxjava:2.1.14'
     api 'junit:junit:4.4'
     implementation 'junit:junit-dep:4.4'

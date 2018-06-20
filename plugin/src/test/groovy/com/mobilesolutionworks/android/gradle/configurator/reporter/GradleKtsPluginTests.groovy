@@ -1,8 +1,7 @@
-package com.mobilesolutionworks.android.gradle.configurator.substitution
+package com.mobilesolutionworks.android.gradle.configurator.reporter
 
 import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
-import org.gradle.testkit.runner.BuildResult
 import org.junit.Before
 
 class GradleKtsPluginTests extends PluginTestSpecification {
@@ -24,13 +23,25 @@ class GradleKtsPluginTests extends PluginTestSpecification {
             }
         }
         
+        apply plugin: "works-ci-reporter"
+        
+        subprojects {
+            apply plugin: "works-dependency-substitute"
+            
+            worksSubstitution {
+                substitute spec("junit:junit") with version("4.12")
+            }
+            
+            worksReporter  { 
+                checkstyleTasks = ["detektCheck"]
+                checkstyleFiles = files("build/reports/detekt")
+            }            
+        }
         """)
 
-        execute(":app:worksPrintDependencies", "-PdepOutput=deps.txt")
+        execute("detektGenerateConfig", "detektCheck", "worksGatherCheckstyle", "test", "worksGatherReport")
 
         then:
-        def lines = new File(testDir.root, "deps.txt").readLines()
-        lines.contains("junit:junit:4.5")
-        lines.contains("junit:junit-dep:4.5")
+        true
     }
 }

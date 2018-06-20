@@ -69,7 +69,7 @@ abstract class PluginTestSpecification extends Specification {
         |
         |    dependencies {
         |        classpath files($classpathString)
-        |        classpath 'com.mobilesolutionworks:works-publish:1.0.3'
+        |        classpath 'com.mobilesolutionworks:works-publish:1.5.1'
         |    }
         |}
         |
@@ -95,7 +95,7 @@ abstract class PluginTestSpecification extends Specification {
         gradleRunner = GradleRunner.create()
                 .withProjectDir(testDir.root)
                 .withPluginClasspath()
-                .withGradleVersion("4.8")
+                .withGradleVersion("4.7")
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
     }

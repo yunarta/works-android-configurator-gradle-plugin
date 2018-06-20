@@ -2,6 +2,7 @@ import com.mobilesolutionworks.android.gradle.configurator.substitution.worksSub
 
 plugins {
     `java-library`
+    id("io.gitlab.arturbosch.detekt") version "1.0.0.RC7-2"
 }
 
 repositories {
@@ -11,6 +12,7 @@ repositories {
 }
 
 apply {
+    plugin("kotlin")
     plugin("works-publish")
     plugin("works-dependency-substitute")
 }
@@ -18,6 +20,20 @@ apply {
 worksSubstitution?.apply {
     substitute(spec("junit")).with(version("4.5"))
 }
+
+detekt {
+    version = "1.0.0.RC7-2"
+
+    profile("main", Action {
+        input = "src/main/kotlin"
+        filters = ".*/resources/.*,.*/build/.*"
+        config = file("default-detekt-config.yml")
+        output = "$buildDir/reports/detekt"
+        outputName = "detekt-report"
+        baseline = "reports/baseline.xml"
+    })
+}
+
 
 version = "1.0.0"
 

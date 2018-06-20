@@ -60,9 +60,7 @@ val jacocoRuntime by configurations.creating
 dependencies {
     jacocoRuntime("org.jacoco:org.jacoco.agent:0.8.1")
 
-    testImplementation("junit:junit:4.12") {
-        this.reason
-    }
+    testImplementation("junit:junit:4.12")
 
     testImplementation(gradleTestKit())
     testImplementation("org.mockito:mockito-core:2.19.0")
@@ -73,6 +71,7 @@ dependencies {
 
     compileOnly(gradleApi())
 
+    implementation("commons-io:commons-io:2.6")
     implementation(kotlin("stdlib-jdk8", kotlinVersion))
     implementation(kotlin("reflect", kotlinVersion))
 }
@@ -80,6 +79,7 @@ dependencies {
 task("cleanTest", Delete::class) {
     delete(
             tasks.getByName("test").outputs.files,
+            Paths.get("build", "jacocoAgent", "gradle.properties"),
             Paths.get("build", "tmp", "runTest").toFile()
     )
 }

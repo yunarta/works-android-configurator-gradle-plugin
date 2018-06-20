@@ -58,6 +58,12 @@ fun stepIn(project: Project, root: ResolvedDependency): MutableSet<String> {
     return dependencies
 }
 
+tasks.create("checkAll", Copy::class.java) {
+    dependsOn("detektCheck")
+    from("build/reports/detekt")
+    into("build/reports/check")
+}
+
 tasks.create("worksPrintDependencies") {
     doLast {
         val dependencies = mutableSetOf<String>()

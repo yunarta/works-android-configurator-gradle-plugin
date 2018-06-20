@@ -14,8 +14,6 @@ import java.nio.file.Paths
 
 class ReporterPlugin : Plugin<Project> {
 
-    private val reporterExtensions = mutableMapOf<String, ReporterExtension>()
-
     override fun apply(target: Project) {
         if (target.rootProject == target) {
             applyToRootProject(target)
@@ -48,10 +46,7 @@ class ReporterPlugin : Plugin<Project> {
                 subprojects { subProject ->
                     subProject.tasks.withType(Test::class.java).map {
                         val name = when (it.name) {
-                            reporterExtensions[subProject.name]?.defaultTest -> {
-                                println("replaced")
-                                "default"
-                            }
+                            subProject.reporter.defaultTest -> "default"
                             else -> it.name
                         }
 
@@ -73,18 +68,17 @@ class ReporterPlugin : Plugin<Project> {
                 copy.into(project.buildDir.paths("reports", "jacoco"))
                 copy.shouldRunAfter("worksRootJacocoReport")
 
-                subprojects {subProject ->
+                subprojects { subProject ->
                     subProject.tasks.withType(JacocoReport::class.java).forEach {
                         val xmlReport = it.reports.xml
                         val htmlReport = it.reports.html
 
                         val name = when (it.name) {
-                            reporterExtensions[subProject.name]?.defaultCoverage -> {
+                            subProject.reporter.defaultCoverage -> {
                                 xmlReport.isEnabled = true
                                 htmlReport.isEnabled = true
                                 "default"
                             }
-                            "worksRootJacocoReport" -> return@forEach
                             else -> it.name
                         }
 
@@ -111,7 +105,7 @@ class ReporterPlugin : Plugin<Project> {
                     }
                 }
                 jacoco.destinationFile = project.buildDir.paths("reports", "jacoco", "exec", "root", "jacoco.exec")
-                jacoco.onlyIf {
+               jacoco.onlyIf {
                     jacoco.executionData?.map {
                         it.exists()
                     }?.reduce { a, b -> a && b } ?: false
@@ -146,20 +140,18 @@ class ReporterPlugin : Plugin<Project> {
             tasks.create("worksGatherCheckstyle", Copy::class.java) { copy ->
                 copy.into(project.buildDir.paths("reports", "checkstyle"))
 
-                subprojects { subProject ->
-                    reporterExtensions[subProject.name]?.let { extension ->
-                        createCopySpec(copy, subProject, extension.checkstyleTasks, extension.checkstyleFiles)
-                    } ?: copy.onlyIf { false }
+                subprojects {
+                    val extension = it.reporter
+                    createCopySpec(copy, it, extension.checkstyleTasks, extension.checkstyleFiles)
                 }
             }
 
             tasks.create("worksGatherPMD", Copy::class.java) { copy ->
                 copy.into(project.buildDir.paths("reports", "pmd"))
 
-                subprojects { subProject ->
-                    reporterExtensions[subProject.name]?.let { extension ->
-                        createCopySpec(copy, subProject, extension.pmdTasks, extension.pmdFiles)
-                    } ?: copy.onlyIf { false }
+                subprojects {
+                    val extension = it.reporter
+                    createCopySpec(copy, it, extension.pmdTasks, extension.pmdFiles)
                 }
             }
 
@@ -185,8 +177,6 @@ class ReporterPlugin : Plugin<Project> {
                     it.path
                 }
             }.toTypedArray()
-
-            copy.dependsOn(*list)
             copy.shouldRunAfter(*list)
         }
 
@@ -195,7 +185,6 @@ class ReporterPlugin : Plugin<Project> {
                 spec.into(Paths.get(project.name).toFile())
                 spec.include("*.xml")
             }
-            copy.dependsOn(it)
         }
     }
 
@@ -204,9 +193,11 @@ class ReporterPlugin : Plugin<Project> {
     }
 
     private fun createExtension(project: Project) {
-        ReporterExtension().also {
-            reporterExtensions[project.name] = it
-            project.extensions.add("worksReporter", it)
-        }
+        project.extensions.add("worksReporter", ReporterExtension())
     }
+
+    private val Project.reporter: ReporterExtension
+        get() {
+            return extensions.getByType(ReporterExtension::class.java)
+        }
 }

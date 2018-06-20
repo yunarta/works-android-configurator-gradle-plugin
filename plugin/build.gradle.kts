@@ -80,7 +80,7 @@ dependencies {
 task("cleanTest", Delete::class) {
     delete(
             tasks.getByName("test").outputs.files,
-            Paths.get("build", "jacocoAgent", "gradle.properties"),
+            Paths.get("build", "testKit", "jacocoEnv"),
             Paths.get("build", "tmp", "runTest").toFile()
     )
 }
@@ -140,10 +140,12 @@ tasks.create("createClasspathManifest") {
 }
 
 tasks.withType<Test> {
-    shouldRunAfter("testKitExtractAgent")
+    shouldRunAfter("testKitSetupAgent")
+    dependsOn("testKitSetupAgent")
 }
 
 tasks.withType<JacocoReport> {
+
     reports {
         xml.isEnabled = true
         html.isEnabled = true
@@ -169,29 +171,6 @@ tasks.createLater("openJacocoReport", Exec::class.java) {
         setCommandLine("open", "$index")
     }
 }
-
-//tasks.create("jacocoCoverageTest", JacocoReport::class.java) {
-//    group = "jacoco"
-//    description = "Generate Jacoco coverage reports for Debug build"
-//
-//    dependsOn("setupJacocoAgent", "test")
-//    inputs.file(fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec")))
-//    reports {
-//        xml.isEnabled = true
-//        html.isEnabled = true
-//    }
-//
-//    // generated classes
-//    classDirectories = fileTree(mapOf(
-//            "dir" to "$buildDir/classes/java/main")
-//    ) + fileTree(mapOf(
-//            "dir" to "$buildDir/classes/kotlin/main")
-//    )
-//
-//    // sources
-//    sourceDirectories = files(listOf("src/main/kotlin", "src/main/java", "/src/test/groovy"))
-//    executionData = fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec"))
-//}
 
 tasks.create("automationTest") {
     group = "automation"
@@ -232,11 +211,12 @@ tasks.create("testKitSetupAgent", WriteProperties::class.java) {
     }
 
     dependsOn("testKitExtractAgent")
-    doFirst {
-        val jacocoPath = File(extractAgent.destinationDir, "jacocoagent.jar")
-        val jacocoReportDir = File(buildDir, "jacoco")
-        property("org.gradle.jvmargs", "-javaagent:${jacocoPath}=destfile=${jacocoReportDir}")
+    shouldRunAfter("testKitExtractAgent")
 
+    val jacocoPath = File(extractAgent.destinationDir, "jacocoagent.jar")
+    val jacocoReportDir = File(buildDir, "jacoco")
+    property("org.gradle.jvmargs", "-javaagent:${jacocoPath}=destfile=${jacocoReportDir}")
+    doFirst {
         logger.quiet("""Gradle properties for Tests
                    |org.gradle.jvmargs=-javaagent:${jacocoPath}=destfile=${jacocoReportDir}
             """.trimMargin())

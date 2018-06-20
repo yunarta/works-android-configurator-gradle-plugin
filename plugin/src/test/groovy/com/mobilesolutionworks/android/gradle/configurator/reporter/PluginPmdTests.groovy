@@ -4,7 +4,7 @@ import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecif
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
 import org.junit.Before
 
-class EdgePluginTests extends PluginTestSpecification {
+class PluginPmdTests extends PluginTestSpecification {
 
     @Before
     static def configure() {
@@ -14,7 +14,7 @@ class EdgePluginTests extends PluginTestSpecification {
         FileUtils.copyDirectory(new File(resource.file), testDir.root)
     }
 
-    def "test calling gather immediately"() {
+    def "test substitute by spec project"() {
         when:
         buildGradle.append("""
         apply plugin: "works-ci-reporter"
@@ -29,17 +29,18 @@ class EdgePluginTests extends PluginTestSpecification {
             }
             
             worksReporter  {
+                pmdTasks = ["pmdMain"]
             }            
         }
         """)
 
-        execute("worksGatherReport")
+        execute("pmdMain", "test", "jacocoTestReport", "developerJacocoTestReport", "worksGatherReport")
 
         then:
         true
     }
 
-    def "test calling only one coverage"() {
+    def "test substitute by spec project2"() {
         when:
         buildGradle.append("""
         apply plugin: "works-ci-reporter"
@@ -54,11 +55,12 @@ class EdgePluginTests extends PluginTestSpecification {
             }
             
             worksReporter  {
+                pmdFiles = files("build/reports/pmd")
             }            
         }
         """)
 
-        execute("jacocoTestReport", "worksGatherReport")
+        execute("pmdMain", "test", "jacocoTestReport", "developerJacocoTestReport", "worksGatherReport")
 
         then:
         true

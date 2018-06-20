@@ -10,6 +10,7 @@ repositories {
 
 apply plugin: "works-publish"
 apply plugin: "jacoco"
+apply plugin: "pmd"
 
 version "1.0.0"
 

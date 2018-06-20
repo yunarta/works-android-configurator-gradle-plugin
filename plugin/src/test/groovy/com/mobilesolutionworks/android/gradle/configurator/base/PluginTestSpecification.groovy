@@ -49,8 +49,7 @@ abstract class PluginTestSpecification extends Specification {
 
         def resource = loader.getResource("gradle.properties")
         if (resource != null) {
-            def agent = resource.text + File.separatorChar + "${getClass().name}.exec"
-            agent = agent.replace('\\', '\\\\')
+            def agent = resource.text.trim() + File.separatorChar + "${getClass().name}.exec"
 
             gradleProperties.write("""${agent}
             |org.gradle.daemon=true""".stripMargin("|"))

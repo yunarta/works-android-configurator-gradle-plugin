@@ -2,7 +2,6 @@ package com.mobilesolutionworks.android.gradle.configurator.substitution
 
 import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
-import org.gradle.testkit.runner.BuildResult
 import org.junit.Before
 
 class GradleKtsPluginTests extends PluginTestSpecification {

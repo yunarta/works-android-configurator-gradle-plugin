@@ -14,7 +14,7 @@ class BasePluginTests extends PluginTestSpecification {
         FileUtils.copyDirectory(new File(resource.file), testDir.root)
     }
 
-    def "test substitute by spec project"() {
+    def "test default task"() {
         when:
         buildGradle.append("""
         apply plugin: "works-ci-reporter"
@@ -29,11 +29,13 @@ class BasePluginTests extends PluginTestSpecification {
             }
             
             worksReporter  {
+                defaultCoverage = "developerJacocoTestReport"
+                defaultTest = "parallelTest"
             }            
         }
         """)
 
-        execute("test", "jacocoTestReport", "developerJacocoTestReport", "worksGatherReport")
+        execute("worksGatherReport")
 
         then:
         true

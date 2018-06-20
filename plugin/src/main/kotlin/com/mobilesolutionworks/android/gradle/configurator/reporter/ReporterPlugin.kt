@@ -124,13 +124,13 @@ class ReporterPlugin : Plugin<Project> {
 
                 subprojects {
                     val jacocoCoverageTests = it.tasks.withType(JacocoReport::class.java)
-                    jacoco.classDirectories = files(*(jacocoCoverageTests.flatMap {
+                    jacoco.classDirectories = files(jacocoCoverageTests.flatMap {
                         it.classDirectories ?: files()
-                    }.toTypedArray()))
+                    })
 
-                    jacoco.sourceDirectories = files(*(jacocoCoverageTests.flatMap {
+                    jacoco.sourceDirectories = files(jacocoCoverageTests.flatMap {
                         it.sourceDirectories ?: files()
-                    }.toTypedArray()))
+                    })
 
 
                     jacoco.executionData(mergeCoverage.destinationFile)
@@ -167,7 +167,7 @@ class ReporterPlugin : Plugin<Project> {
                 it.group = "works reporter"
 
                 it.shouldRunAfter("worksRootJacocoReport")
-                it.dependsOn("worksRootJacocoReport", "worksGatherTestReport", "worksGatherCoverageReport")
+                it.dependsOn("worksGatherCheckstyle", "worksGatherPMD", "worksRootJacocoReport", "worksGatherTestReport", "worksGatherCoverageReport")
             }
         }
     }
@@ -182,18 +182,23 @@ class ReporterPlugin : Plugin<Project> {
                     }
 
                     copy.from(it.outputs) { spec ->
-                        spec.into(Paths.get(it.project.name).toFile())
+                        spec.into(Paths.get("html", it.project.name).toFile())
+                        spec.include("*.html")
+                    }
+
+                    copy.from(it.outputs) { spec ->
+                        spec.into(Paths.get("xml", it.project.name).toFile())
+                        spec.include("*.xml")
                     }
                     it.path
                 }
-            }.toTypedArray()
-            copy.shouldRunAfter(*list)
+            }
+            copy.setShouldRunAfter(list)
         }
 
         checkstyleFiles?.let {
             copy.from(it) { spec ->
-                spec.into(Paths.get(project.name).toFile())
-                spec.include("*.xml")
+                spec.into(Paths.get("raw", project.name).toFile())
             }
         }
     }

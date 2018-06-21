@@ -94,7 +94,7 @@ abstract class PluginTestSpecification extends Specification {
         gradleRunner = GradleRunner.create()
                 .withProjectDir(testDir.root)
                 .withPluginClasspath()
-                .withGradleVersion("4.7")
+                .withGradleVersion("4.8")
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
     }

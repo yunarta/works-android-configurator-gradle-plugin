@@ -19,7 +19,7 @@ class GradleKtsPluginTests extends PluginTestSpecification {
         buildGradle.append("""
         buildscript {
             dependencies {
-                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.41"
+                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.50"
             }
         }
         

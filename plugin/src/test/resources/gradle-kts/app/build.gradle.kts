@@ -2,19 +2,17 @@ import com.mobilesolutionworks.android.gradle.configurator.substitution.worksSub
 
 plugins {
     `java-library`
+    kotlin("jvm")
+
     id("io.gitlab.arturbosch.detekt") version "1.0.0.RC7-2"
+    id("works-publish")
+    id("works-dependency-substitute")
 }
 
 repositories {
     google()
     jcenter()
     mavenCentral()
-}
-
-apply {
-    plugin("kotlin")
-    plugin("works-publish")
-    plugin("works-dependency-substitute")
 }
 
 worksSubstitution?.apply {

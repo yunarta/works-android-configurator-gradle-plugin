@@ -1,6 +1,6 @@
-package com.mobilesolutionworks.android.gradle.configurator.report.manager
+package com.mobilesolutionworks.gradle.plugin.report.manager
 
-import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
+import com.mobilesolutionworks.gradle.plugin.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
 import org.junit.Before
 
@@ -16,7 +16,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
 
     def "test checkstyle gathering"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         buildscript {
             dependencies {
                 classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.41"
@@ -47,7 +47,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
 
     def "test using checkstyle task with output"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         buildscript {
             dependencies {
                 classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.41"
@@ -77,7 +77,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
 
     def "test using checkstyle task with non existing tasks"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         buildscript {
             dependencies {
                 classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.41"

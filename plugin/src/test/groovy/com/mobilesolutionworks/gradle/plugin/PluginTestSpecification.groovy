@@ -1,4 +1,4 @@
-package com.mobilesolutionworks.android.gradle.configurator.base
+package com.mobilesolutionworks.gradle.plugin
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner

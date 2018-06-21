@@ -1,6 +1,6 @@
-package com.mobilesolutionworks.android.gradle.configurator.substitution
+package com.mobilesolutionworks.gradle.plugin.substitution
 
-import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
+import com.mobilesolutionworks.gradle.plugin.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.BuildResult
 import org.junit.Before
@@ -17,7 +17,7 @@ class BasePluginTests extends PluginTestSpecification {
 
     def "test substitute by spec project"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
@@ -36,7 +36,7 @@ class BasePluginTests extends PluginTestSpecification {
 
     def "test substitute by module project"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
@@ -54,7 +54,7 @@ class BasePluginTests extends PluginTestSpecification {
 
     def "test integration build project"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
@@ -80,7 +80,7 @@ class BasePluginTests extends PluginTestSpecification {
 
     def "test integration + unstable build project"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
@@ -110,7 +110,7 @@ class BasePluginTests extends PluginTestSpecification {
 
     def "test missing build type build project"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
@@ -135,7 +135,7 @@ class BasePluginTests extends PluginTestSpecification {
 
     def "trim wrong spec"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {
@@ -157,7 +157,7 @@ class BasePluginTests extends PluginTestSpecification {
 
     def "trim incomplete substitution"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         subprojects {
             apply plugin: "works-dependency-substitute"
             worksSubstitution {

@@ -1,6 +1,6 @@
-package com.mobilesolutionworks.android.gradle.configurator.substitution
+package com.mobilesolutionworks.gradle.plugin.substitution
 
-import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
+import com.mobilesolutionworks.gradle.plugin.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
 import org.junit.Before
 

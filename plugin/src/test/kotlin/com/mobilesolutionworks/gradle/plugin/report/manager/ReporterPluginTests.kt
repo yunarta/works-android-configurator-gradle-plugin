@@ -1,7 +1,5 @@
-package com.mobilesolutionworks.android.gradle.configurator.report.manager
+package com.mobilesolutionworks.gradle.plugin.report.manager
 
-import com.mobilesolutionworks.gradle.plugin.report.manager.ReporterExtension
-import com.mobilesolutionworks.gradle.plugin.report.manager.worksReportManager
 import com.nhaarman.mockito_kotlin.whenever
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer

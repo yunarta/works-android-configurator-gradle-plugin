@@ -1,6 +1,6 @@
-package com.mobilesolutionworks.android.gradle.configurator.report.manager
+package com.mobilesolutionworks.gradle.plugin.report.manager
 
-import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
+import com.mobilesolutionworks.gradle.plugin.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
 import org.junit.Before
 
@@ -16,7 +16,7 @@ class PluginPmdTests extends PluginTestSpecification {
 
     def "test substitute by spec project"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         apply plugin: "works-report-manager"
         apply plugin: "jacoco"
         
@@ -42,7 +42,7 @@ class PluginPmdTests extends PluginTestSpecification {
 
     def "test substitute by spec project2"() {
         when:
-        buildGradle.append("""
+        PluginTestSpecification.buildGradle.append("""
         apply plugin: "works-report-manager"
         apply plugin: "jacoco"
         

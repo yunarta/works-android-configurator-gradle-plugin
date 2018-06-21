@@ -1,4 +1,4 @@
-package com.mobilesolutionworks.android.gradle.configurator.reporter
+package com.mobilesolutionworks.android.gradle.configurator.report.manager
 
 import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
@@ -23,7 +23,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
             }
         }
         
-        apply plugin: "works-ci-reporter"
+        apply plugin: "works-report-manager"
         
         subprojects {
             apply plugin: "works-dependency-substitute"
@@ -32,7 +32,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
                 substitute spec("junit:junit") with version("4.12")
             }
             
-            worksReporter  { 
+            worksReportManager  { 
                 checkstyleTasks = ["detektCheck"]
                 checkstyleFiles = files("build/reports/detekt")
             }            
@@ -54,7 +54,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
             }
         }
         
-        apply plugin: "works-ci-reporter"
+        apply plugin: "works-report-manager"
         
         subprojects {
             apply plugin: "works-dependency-substitute"
@@ -63,7 +63,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
                 substitute spec("junit:junit") with version("4.12")
             }
             
-            worksReporter  { 
+            worksReportManager  { 
                 checkstyleTasks = ["checkAll"]
             }    
         }
@@ -84,7 +84,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
             }
         }
         
-        apply plugin: "works-ci-reporter"
+        apply plugin: "works-report-manager"
         
         subprojects {
             apply plugin: "works-dependency-substitute"
@@ -93,7 +93,7 @@ class PluginCheckstyleTests extends PluginTestSpecification {
                 substitute spec("junit:junit") with version("4.12")
             }
             
-            worksReporter  { 
+            worksReportManager  { 
                 checkstyleTasks = ["nonExisting"]
             }    
         }

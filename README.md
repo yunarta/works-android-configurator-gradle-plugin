@@ -55,7 +55,7 @@ subprojects {
 
 root **build.gradle.kts**
 ```kotlin 
-import com.mobilesolutionworks.android.gradle.configurator.substitution.worksSubstitution
+import com.mobilesolutionworks.gradle.plugin.substitution.worksSubstitution
 
 subprojects {
     apply {

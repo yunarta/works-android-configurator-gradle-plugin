@@ -1,7 +1,7 @@
-package com.mobilesolutionworks.android.gradle.configurator.reporter
+package com.mobilesolutionworks.gradle.plugin.report.manager
 
-import com.mobilesolutionworks.android.gradle.configurator.util.CollectorLatch
-import com.mobilesolutionworks.android.gradle.configurator.util.paths
+import com.mobilesolutionworks.gradle.util.CollectorLatch
+import com.mobilesolutionworks.gradle.util.paths
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
@@ -219,7 +219,7 @@ class ReporterPlugin : Plugin<Project> {
     }
 
     private fun createExtension(project: Project) {
-        project.extensions.add("worksReporter", ReporterExtension())
+        project.extensions.add("worksReportManager", ReporterExtension())
     }
 
     private val Project.reporter: ReporterExtension

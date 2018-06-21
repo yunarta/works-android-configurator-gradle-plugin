@@ -1,4 +1,4 @@
-package com.mobilesolutionworks.android.gradle.configurator.substitution
+package com.mobilesolutionworks.gradle.plugin.substitution
 
 import com.mobilesolutionworks.android.gradle.configurator.substitution.util.KotlinUtils
 import groovy.lang.Closure

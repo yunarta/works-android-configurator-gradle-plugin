@@ -1,5 +1,7 @@
 package com.mobilesolutionworks.android.gradle.configurator.substitution
 
+import com.mobilesolutionworks.gradle.plugin.substitution.RootSubstituteListContainer
+import com.mobilesolutionworks.gradle.plugin.substitution.worksSubstitution
 import com.nhaarman.mockito_kotlin.whenever
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer

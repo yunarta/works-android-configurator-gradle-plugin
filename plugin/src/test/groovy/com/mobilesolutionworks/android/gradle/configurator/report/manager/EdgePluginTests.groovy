@@ -1,10 +1,10 @@
-package com.mobilesolutionworks.android.gradle.configurator.reporter
+package com.mobilesolutionworks.android.gradle.configurator.report.manager
 
 import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
 import org.junit.Before
 
-class PluginPmdTests extends PluginTestSpecification {
+class EdgePluginTests extends PluginTestSpecification {
 
     @Before
     static def configure() {
@@ -14,53 +14,51 @@ class PluginPmdTests extends PluginTestSpecification {
         FileUtils.copyDirectory(new File(resource.file), testDir.root)
     }
 
-    def "test substitute by spec project"() {
+    def "test calling gather immediately"() {
         when:
         buildGradle.append("""
-        apply plugin: "works-ci-reporter"
+        apply plugin: "works-report-manager"
         apply plugin: "jacoco"
         
         subprojects {
-            apply plugin: "works-ci-reporter"
+            apply plugin: "works-report-manager"
             apply plugin: "works-dependency-substitute"
             
             worksSubstitution {
                 substitute spec("junit:junit") with version("4.12")
             }
             
-            worksReporter  {
-                pmdTasks = ["pmdMain"]
+            worksReportManager  {
             }            
         }
         """)
 
-        execute("pmdMain", "test", "jacocoTestReport", "developerJacocoTestReport", "worksGatherReport")
+        execute("worksGatherReport")
 
         then:
         true
     }
 
-    def "test substitute by spec project2"() {
+    def "test calling only one coverage"() {
         when:
         buildGradle.append("""
-        apply plugin: "works-ci-reporter"
+        apply plugin: "works-report-manager"
         apply plugin: "jacoco"
         
         subprojects {
-            apply plugin: "works-ci-reporter"
+            apply plugin: "works-report-manager"
             apply plugin: "works-dependency-substitute"
             
             worksSubstitution {
                 substitute spec("junit:junit") with version("4.12")
             }
             
-            worksReporter  {
-                pmdFiles = files("build/reports/pmd")
+            worksReportManager  {
             }            
         }
         """)
 
-        execute("pmdMain", "test", "jacocoTestReport", "developerJacocoTestReport", "worksGatherReport")
+        execute("jacocoTestReport", "worksGatherReport")
 
         then:
         true

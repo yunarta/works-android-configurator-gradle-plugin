@@ -1,5 +1,6 @@
 package com.mobilesolutionworks.android.gradle.configurator.substitution
 
+import com.mobilesolutionworks.gradle.plugin.substitution.ModuleSpec
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Test

@@ -1,4 +1,4 @@
-package com.mobilesolutionworks.android.gradle.configurator.util
+package com.mobilesolutionworks.gradle.util
 
 import java.io.File
 import java.nio.file.Paths

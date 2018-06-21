@@ -1,4 +1,4 @@
-package com.mobilesolutionworks.android.gradle.configurator.substitution
+package com.mobilesolutionworks.gradle.plugin.substitution
 
 import org.gradle.api.artifacts.DependencyResolveDetails
 

@@ -1,4 +1,4 @@
-package com.mobilesolutionworks.android.gradle.configurator.reporter
+package com.mobilesolutionworks.android.gradle.configurator.report.manager
 
 import com.mobilesolutionworks.android.gradle.configurator.base.PluginTestSpecification
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
@@ -17,18 +17,18 @@ class BasePluginTests extends PluginTestSpecification {
     def "test default task"() {
         when:
         buildGradle.append("""
-        apply plugin: "works-ci-reporter"
+        apply plugin: "works-report-manager"
         apply plugin: "jacoco"
         
         subprojects {
-            apply plugin: "works-ci-reporter"
+            apply plugin: "works-report-manager"
             apply plugin: "works-dependency-substitute"
             
             worksSubstitution {
                 substitute spec("junit:junit") with version("4.12")
             }
             
-            worksReporter  {
+            worksReportManager  {
                 defaultCoverage = "developerJacocoTestReport"
                 defaultTest = "parallelTest"
             }            

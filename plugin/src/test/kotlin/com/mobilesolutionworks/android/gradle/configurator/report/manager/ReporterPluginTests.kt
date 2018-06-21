@@ -1,5 +1,7 @@
-package com.mobilesolutionworks.android.gradle.configurator.reporter
+package com.mobilesolutionworks.android.gradle.configurator.report.manager
 
+import com.mobilesolutionworks.gradle.plugin.report.manager.ReporterExtension
+import com.mobilesolutionworks.gradle.plugin.report.manager.worksReportManager
 import com.nhaarman.mockito_kotlin.whenever
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
@@ -16,10 +18,10 @@ class ReporterPluginTests {
         val extensions = Mockito.mock(ExtensionContainer::class.java)
         whenever(project.extensions).thenReturn(extensions)
 
-        assertNull(project.worksReporter)
+        assertNull(project.worksReportManager)
 
         val container = Mockito.mock(ReporterExtension::class.java)
-        whenever(extensions.findByName("worksReporter")).thenReturn(container)
-        assertEquals(container, project.worksReporter)
+        whenever(extensions.findByName("worksReportManager")).thenReturn(container)
+        assertEquals(container, project.worksReportManager)
     }
 }

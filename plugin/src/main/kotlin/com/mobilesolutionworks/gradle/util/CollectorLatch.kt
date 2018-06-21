@@ -1,4 +1,4 @@
-package com.mobilesolutionworks.android.gradle.configurator.util
+package com.mobilesolutionworks.gradle.util
 
 internal class CollectorLatch<T>(private val size: Int, private val instance: T, private val closure: (T) -> Unit) {
 

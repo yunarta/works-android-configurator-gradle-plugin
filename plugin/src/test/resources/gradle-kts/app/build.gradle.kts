@@ -1,5 +1,3 @@
-import com.mobilesolutionworks.android.gradle.configurator.substitution.worksSubstitution
-
 plugins {
     `java-library`
     kotlin("jvm")

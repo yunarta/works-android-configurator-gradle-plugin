@@ -1,5 +1,5 @@
 rootProject.name = "Works - Gradle Configurator"
 
-include(":works-gradle-configurator")
-project(":works-gradle-configurator").projectDir = File("plugin")
+include(":works-reporting")
+project(":works-reporting").projectDir = File("plugin")
 

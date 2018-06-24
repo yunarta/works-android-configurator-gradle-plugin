@@ -1,6 +1,9 @@
 plugins {
     id "java-library"
-    id "works-publish"
+    id "com.mobilesolutionworks.gradle.publish" version "1.5.3"
+    id "jacoco"
+    id "pmd"
+    id "com.mobilesolutionworks.gradle.reporting"
 }
 
 repositories {
@@ -9,12 +12,7 @@ repositories {
     mavenCentral()
 }
 
-apply plugin: "works-publish"
-apply plugin: "jacoco"
-apply plugin: "pmd"
-
 version "1.0.0"
-
 
 HashSet<String> stepIn(Project project, ResolvedDependency root) {
     def dependencies = new HashSet<String>()

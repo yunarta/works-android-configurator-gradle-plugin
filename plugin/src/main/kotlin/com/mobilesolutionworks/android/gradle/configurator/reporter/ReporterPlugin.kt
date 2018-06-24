@@ -44,7 +44,7 @@ class ReporterPlugin : Plugin<Project> {
             createGatherStaticAnalysisTasks(project)
 
             tasks.create("worksGatherReport") {
-                it.group = "works reporter"
+                it.group = "works-reporting"
 
                 it.shouldRunAfter("worksRootJacocoReport")
                 it.dependsOn("worksGatherCheckstyle", "worksGatherPMD", "worksRootJacocoReport",
@@ -55,7 +55,7 @@ class ReporterPlugin : Plugin<Project> {
 
     private fun Project.createGatherTestTasks(subProject: Project) {
         tasks.create("worksGatherTestReport", Copy::class.java) { copy: Copy ->
-            copy.group = "works reporter"
+            copy.group = "works-reporting"
             copy.into(subProject.buildDir.paths("reports", "junit"))
 
             subprojects { subProject ->
@@ -65,12 +65,12 @@ class ReporterPlugin : Plugin<Project> {
                         else -> it.name
                     }
 
-                    copy.from(it) { spec ->
+                    copy.from(it.reports.junitXml.destination) { spec ->
                         spec.include("*.xml")
                         spec.into(Paths.get("xml", it.project.name, name).toFile())
                     }
 
-                    copy.from(it) { spec ->
+                    copy.from(it.reports.html.destination) { spec ->
                         spec.exclude("*.xml")
                         spec.into(Paths.get("html", it.project.name, name).toFile())
                     }
@@ -81,7 +81,7 @@ class ReporterPlugin : Plugin<Project> {
 
     private fun Project.createGatherJacocoTasks(subProject: Project) {
         tasks.create("worksGatherCoverageReport", Copy::class.java) { copy ->
-            copy.group = "works reporter"
+            copy.group = "works-reporting"
             copy.into(subProject.buildDir.paths("reports", "jacoco"))
             copy.shouldRunAfter("worksRootJacocoReport")
 
@@ -116,7 +116,7 @@ class ReporterPlugin : Plugin<Project> {
         }
 
         val mergeCoverage = tasks.create("worksMergeJacocoExec", JacocoMerge::class.java) { jacoco ->
-            jacoco.group = "works reporter"
+            jacoco.group = "works-reporting"
             jacoco.destinationFile = subProject.buildDir.paths("reports", "jacoco", "exec", "root", "jacoco.exec")
 
             jacoco.onlyIf {
@@ -136,7 +136,7 @@ class ReporterPlugin : Plugin<Project> {
         }
 
         tasks.create("worksRootJacocoReport", JacocoReport::class.java) { jacoco ->
-            jacoco.group = "works reporter"
+            jacoco.group = "works-reporting"
             jacoco.dependsOn(mergeCoverage.path)
 
             subprojects {
@@ -163,7 +163,7 @@ class ReporterPlugin : Plugin<Project> {
 
     private fun Project.createGatherStaticAnalysisTasks(subProject: Project) {
         tasks.create("worksGatherCheckstyle", Copy::class.java) { copy ->
-            copy.group = "works reporter"
+            copy.group = "works-reporting"
             copy.into(subProject.buildDir.paths("reports", "checkstyle"))
 
             subprojects {
@@ -173,7 +173,7 @@ class ReporterPlugin : Plugin<Project> {
         }
 
         tasks.create("worksGatherPMD", Copy::class.java) { copy ->
-            copy.group = "works reporter"
+            copy.group = "works-reporting"
             copy.into(subProject.buildDir.paths("reports", "pmd"))
 
             subprojects {
@@ -219,7 +219,7 @@ class ReporterPlugin : Plugin<Project> {
     }
 
     private fun createExtension(project: Project) {
-        project.extensions.add("worksReporter", ReporterExtension())
+        project.extensions.add("worksReporting", ReporterExtension())
     }
 
     private val Project.reporter: ReporterExtension

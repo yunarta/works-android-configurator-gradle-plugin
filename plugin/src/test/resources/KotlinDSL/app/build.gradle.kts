@@ -1,12 +1,10 @@
-import com.mobilesolutionworks.android.gradle.configurator.substitution.worksSubstitution
-
 plugins {
     `java-library`
     kotlin("jvm")
 
     id("io.gitlab.arturbosch.detekt") version "1.0.0.RC7-2"
-    id("works-publish")
-    id("works-dependency-substitute")
+    id("com.mobilesolutionworks.gradle.publish") version "1.5.3"
+    id("com.mobilesolutionworks.gradle.reporting")
 }
 
 repositories {
@@ -15,7 +13,7 @@ repositories {
     mavenCentral()
 }
 
-worksSubstitution?.apply {
+worksSubstitution {
     substitute(spec("junit")).with(version("4.5"))
 }
 

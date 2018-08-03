@@ -11,18 +11,13 @@ plugins {
 
     id("io.gitlab.arturbosch.detekt") version "1.0.0.RC7-2"
     id("org.jetbrains.dokka") version "0.9.17"
-    id("com.gradle.plugin-publish") version "0.9.10"
-    id("com.mobilesolutionworks.gradle.jacoco") version "1.0.0"
+    id("com.mobilesolutionworks.gradle.jacoco") version "1.1.3"
     id("com.mobilesolutionworks.gradle.publish") version "1.5.3"
+    id("com.gradle.plugin-publish") version "0.9.10"
 }
 
 group = "com.mobilesolutionworks.gradle"
-version = "1.0.0"
-
-worksPublish {
-    javadoc = PublishedDoc.Kotlin
-    module = file("module.yaml")
-}
+version = "1.0.9"
 
 worksJacoco {
     hasTestKit = true
@@ -153,7 +148,7 @@ val ignoreFailures: String? by rootProject.extra
 val shouldIgnoreFailures = ignoreFailures?.toBoolean() == true
 
 tasks.withType<Test> {
-    maxParallelForks = Runtime.getRuntime().availableProcessors() // .div(2)
+    maxParallelForks = Math.max(1, Runtime.getRuntime().availableProcessors().div(2))
     ignoreFailures = shouldIgnoreFailures
 
     doFirst {

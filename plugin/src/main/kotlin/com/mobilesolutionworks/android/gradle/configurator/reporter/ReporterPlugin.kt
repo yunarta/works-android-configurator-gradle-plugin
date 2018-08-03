@@ -60,6 +60,7 @@ class ReporterPlugin : Plugin<Project> {
 
             subprojects { subProject ->
                 subProject.tasks.withType(Test::class.java).map {
+                    copy.shouldRunAfter(it)
                     val name = when (it.name) {
                         subProject.reporter.defaultTest -> "default"
                         else -> it.name
@@ -86,6 +87,10 @@ class ReporterPlugin : Plugin<Project> {
             copy.shouldRunAfter("worksRootJacocoReport")
 
             subprojects { subProject ->
+                subProject.tasks.withType(Test::class.java).map {
+                    copy.shouldRunAfter(it)
+                }
+
                 subProject.tasks.withType(JacocoReport::class.java).forEach {
                     val xmlReport = it.reports.xml
                     val htmlReport = it.reports.html
@@ -122,6 +127,10 @@ class ReporterPlugin : Plugin<Project> {
             jacoco.onlyIf {
                 var execute = false
                 subprojects {
+                    it.tasks.withType(Test::class.java).map {
+                        jacoco.shouldRunAfter(it)
+                    }
+
                     it.tasks.withType(JacocoReport::class.java).forEach {
                         it.executionData.files.filter {
                             it.exists()
